@@ -11,6 +11,7 @@
 #include <cctype>
 #include "Support/clsInputValidate.h"
 #include "clsGlobal.h"
+#include <cstdlib>
 #include <iomanip>
 
 using namespace std ;
@@ -73,27 +74,90 @@ private :
         StopScreen() ;
     }
 
+    static void Ask_the_Audience_Used() {
+
+        system("cls") ;
+        cout << "Ask_the_Audience Already been used!" << endl ;
+        StopScreen() ;
+    }
+
+    static void Ask_the_AudienceScreen() {
+
+        system("cls") ;
+
+        short Num[4] ;
+        short Support ;
+
+        Num[0] = 56 + rand() % 40 ;
+        Support = 100 - Num[0] ;
+        Num[1] = rand() % (Support + 1) ;
+        Support -= Num[1] ;
+        Num[2] = rand() % (Support + 1) ;
+        Num[3] = Support - Num[2] ;
+
+        Support = 1 ;
+
+        stAnswers Answer = GetAnswers(Index) ;
+        string Correct = GetCorrectAnswer(Index) ;
+
+        cout << "--------------------------------------------------" << endl ;
+        cout << GetCorrectAnswer(Index) << "       %" << Num[0] << endl ;
+
+        for (short j = 0 ; j < 4 ; j++) {
+
+            if (Answer.Answers[j] == Correct) 
+                continue ;
+            
+            cout << "--------------------------------------------------" << endl ;
+            cout << Answer.Answers[j] << "       %" << Num[Support] << endl ;
+            Support++ ;
+
+        }
+
+        cout << endl ;
+
+        StopScreen() ;
+
+
+    }
+
     static void PerformGame(enGameOptions Choice) {
 
         switch (Choice) {
 
-                case enGameOptions::eFifty_Fifty :
-                    if (!(Check[0])) {
+            case enGameOptions::eFifty_Fifty :
+                if (!(Check[0])) {
 
-                        GameScreen(Choice) ;
-                        Check[0] = true ;
-                    }
-                        
-                    else {
-                        Fifty_Fifty_Used() ;
-                        GameScreen(Choice) ;
-                    }
-
-                    Choice = (enGameOptions) ReadChoice() ;
-                    PerformGame(Choice) ;
-
-
+                    GameScreen(Choice) ;
+                    Check[0] = true ;
                 }
+                    
+                else {
+                    Fifty_Fifty_Used() ;
+                    GameScreen(Choice) ;
+                }
+
+                Choice = (enGameOptions) ReadChoice() ;
+                PerformGame(Choice) ;
+                break;
+
+            case enGameOptions::eAsk_the_Audience :
+                if (!(Check[2])) {
+
+                    Ask_the_AudienceScreen() ;
+                    Check[2] = true ;
+                    GameScreen() ;
+                }
+                    
+                else {
+                    Ask_the_Audience_Used() ;
+                    GameScreen() ;
+                }
+
+                Choice = (enGameOptions) ReadChoice() ;
+                PerformGame(Choice) ;
+                break;
+        }        
         
     }
 
@@ -150,7 +214,7 @@ private :
         EndRow() ;
         Row("\t[5]:(Fifty-Fifty):" , 7 ) ;
         Row("\t[6]:(Phone-a-Friend):" , 7) ;
-        Row("\t[5]:(Ask-the-Audience):" , 7) ;
+        Row("\t[7]:(Ask-the-Audience):" , 7) ;
         EndRow() ;
         Row("\t\tConstestant Prize $" , 6 ) ;
         EndRow() ;
