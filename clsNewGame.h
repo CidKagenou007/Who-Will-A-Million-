@@ -121,6 +121,37 @@ private :
 
     }
 
+    static void Phone_a_Friend() {
+
+        short Number = clsUtility::RandomNumber(1 , 2) ;
+
+        system("cls") ;
+
+        cout << "Your Friend Thinks It's        " ;
+
+        switch (Number) {
+
+            case 1 :
+                cout << GetCorrectAnswer(Index) ;
+                break;
+            case 2 :
+                cout << GetAnswers(Index).Answers[clsUtility::RandomNumber(0 , 3)] ;
+                break;
+
+        }
+
+        cout << endl << endl ;
+
+        StopScreen() ;
+    }
+
+    static void Phone_a_Friend_Used() {
+
+        system("cls") ;
+        cout << "Phone_a_Friend Already been used!" << endl ;
+        StopScreen() ;
+    }
+
     static void PerformGame(enGameOptions Choice) {
 
         switch (Choice) {
@@ -135,6 +166,23 @@ private :
                 else {
                     Fifty_Fifty_Used() ;
                     GameScreen(Choice) ;
+                }
+
+                Choice = (enGameOptions) ReadChoice() ;
+                PerformGame(Choice) ;
+                break;
+            
+            case enGameOptions::ePhone_a_Friend :
+                if (!(Check[1])) {
+
+                    Phone_a_Friend() ;
+                    Check[1] = true ;
+                    GameScreen() ;
+                }
+                    
+                else {
+                    Phone_a_Friend_Used() ;
+                    GameScreen() ;
                 }
 
                 Choice = (enGameOptions) ReadChoice() ;
