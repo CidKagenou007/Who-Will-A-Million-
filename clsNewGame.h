@@ -75,36 +75,38 @@ private :
         return Choice ;
     }
 
-    static bool PerformGame(enGameOptions Choice , short Index) {
+    static void Fifty_Fifty_Used() {
 
-        clsCheckAnswerScreen CheckAnswerScreen = clsCheckAnswerScreen(Index) ;
+        system("cls") ;
+        cout << "Fifty_Fifty Already been used!" << endl ;
+        StopScreen() ;
+    }
+
+    static void PerformGame(enGameOptions Choice) {
 
         switch (Choice) {
 
-            case enGameOptions::eAnswer :
-                CheckAnswerScreen.ShowCheckAnswerScreen() ;
-                break;
-            /*case enGameOptions::eFifty_Fifty :
-                clsFifty_FiftyScreen::ShowFifty_FiftyScreen() ;
-                break;
-            case enGameOptions::ePhone_a_Friend :
-                clsPhone_a_FriendScreen::ShowPhone_a_FriendScreen() ;
-                break;
-            case enGameOptions::eAsk_the_Audience :
-                clseAsk_the_AudienceScreen::ShoweAsk_the_AudienceScreen() ;
-                break;
-            */ 
-        } 
+                case enGameOptions::eFifty_Fifty :
+                    if (!(Check[0]))
+                        Check[0] = true ;
+                    else
+                        Fifty_Fifty_Used() ;
 
-        return CheckAnswerScreen.Result() ;
+                    GameScreen(Choice) ;
+                    Choice = (enGameOptions) ReadChoice() ;
+                    PerformGame(Choice) ;
+
+
+                }
+        
     }
 
-    static bool IsAlreadyTaken(short Index , vector <short> vQuestionsTaken) {
+    static bool IsAlreadyTaken(short Index , vector <short> & vQuestionsTaken) {
 
         if (vQuestionsTaken.empty())
             return false ;
 
-        for (short Question : vQuestionsTaken) {
+        for (short & Question : vQuestionsTaken) {
             if (Question == Index)
                 return true ;
         }
@@ -138,78 +140,145 @@ private :
         }
     }
 
+    static void PrintMoney() {
+
+        for (short j = 14 ; j >= 2 ; j -= 3)
+            
+                Print(S[j] , S[j - 1] , S[j - 2]) ;
+    }
+
+    static void HeadScreen() {
+
+        EndRow() ;
+        Row("\tThe LifeLines To Use" , 6) ;
+        EndRow() ;
+        Row("\t[5]:(Fifty-Fifty):" , 7 ) ;
+        Row("\t[6]:(Phone-a-Friend):" , 7) ;
+        Row("\t[5]:(Ask-the-Audience):" , 7) ;
+        EndRow() ;
+        Row("\tConstestant Prize $" , 6 ) ;
+        EndRow() ;
+
+        
+    }
+
+    static void GetIndex(vector <short> & vQuestionsTaken) {
+
+        Index = clsUtility::RandomNumber(0 , 14) ;
+
+        while (IsAlreadyTaken(Index , vQuestionsTaken)) {
+
+            Index = clsUtility::RandomNumber(0 , 14) ;
+        }
+    
+        vQuestionsTaken.push_back(Index) ;
+    }
+
+    static void PrintAnswers(stAnswers Answer , enGameOptions Game) {
+
+        if (Game == enGameOptions::eFifty_Fifty && Check[0] == false) {
+
+            bool Founded = false ;
+
+            for (short j = 0 ; j < 4 ; j++) {
+
+                if (Founded) {
+                    Row("\t(" + to_string((j + 1)) + ") " + Answer.Answers[j] , 7) ;
+                    break;
+                }
+
+                else {
+
+                    if (Answer.Answers[j] == GetCorrectAnswer(Index)) {
+                        Row("\t(" + to_string((j + 1)) + ") " + Answer.Answers[j] , 7) ;
+                        Founded = true ;
+                        continue;
+                    }
+
+                    if (Founded == false && j == 3) {
+                        j = 0 ;
+                        Founded = true ;
+                        
+                    }
+                      
+
+                }
+
+                      
+                        
+            }
+        }
+
+        else {
+
+            for (short j = 0 ; j < 4 ; j++)
+                Row("\t(" + to_string((j + 1)) + ") " + Answer.Answers[j] , 7) ;
+        }
+    }
+
+    static void GameScreen(enGameOptions Game = enGameOptions::eAnswer) {
+
+        system("cls") ;
+
+        HeadScreen() ;
+
+        PrintMoney() ;
+
+        EndRow() ;
+        Row("\tThe Question" , 6) ;
+        EndRow() ;
+
+        Row("\t" + Question(Index), 7) ;
+        EndRow() ;
+
+        PrintAnswers(GetAnswers(Index) , Game) ;
+
+        EndRow() ;
+
+        SetConsoleTextAttribute(h , 7) ;
+    }
+
 public :
 
     void NewGameScreen() {
 
         
         clsUtility::Srand() ;
-        stAnswers Answer ;
 
         char PLayAgain = 'Y' ;
 
         do {
 
             vector <short> vQuestionsTaken ;
-            short Index ;
-            
-            CurrentMoney = 0 ;
-            
+        
             short i = 0 ;
 
             for (i ; i < 15 ; i++) {
 
-            system("cls") ;
+                CurrentMoney = M[i] ;
 
-            S[i] = S[i] + " <" ;
+                GetIndex(vQuestionsTaken) ;
 
-            EndRow() ;
-            Row("\tThe LifeLines To Use" , 6) ;
-            EndRow() ;
-            Row("\t[5]:(Fifty-Fifty):" , 7 ) ;
-            Row("\t[6]:(Phone-a-Friend):" , 7) ;
-            Row("\t[5]:(Ask-the-Audience):" , 7) ;
-            EndRow() ;
-            Row("\tConstestant Prize $" , 6 ) ;
-            EndRow() ;
+                S[i] = S[i] + " <" ;
 
-            for (short j = 14 ; j >= 2 ; j -= 3)
-            
-                Print(S[j] , S[j - 1] , S[j - 2]) ;
-            
-            EndRow() ;
-            Row("\tThe Question" , 6) ;
-            EndRow() ;
-            Index = clsUtility::RandomNumber(0 , 14) ;
+                GameScreen() ;
 
-            while (IsAlreadyTaken(Index , vQuestionsTaken)) {
+                enGameOptions Choice = (enGameOptions) ReadChoice() ;
 
-                Index = clsUtility::RandomNumber(0 , 14) ;
-            }
-    
-            vQuestionsTaken.push_back(Index) ;
-            Row("\t" + Question(Index), 7) ;
-            EndRow() ;
-            Answer = GetAnswers(Index) ;
+                PerformGame(Choice) ;
 
-            for (short j = 0 ; j < 4 ; j++)
-                Row("\t(" + to_string((j + 1)) + ") " + Answer.Answers[j] , 7) ;
+                clsCheckAnswerScreen::ShowCheckAnswerScreen() ;
+                
+                S[i] = clsString::ReplaceWordInString(S[i] , " <" , "") ;
 
-            EndRow() ;
+                if (!Result)
+                    break;
+                
 
-            SetConsoleTextAttribute(h , 7) ;
+                system("Color 07") ;
 
-            CurrentMoney = M[i] ;
 
-            S[i] = clsString::ReplaceWordInString(S[i] , " <" , "") ;            
-
-            if (!(PerformGame((enGameOptions) ReadChoice() , Index)))
-                break;
-
-            system("Color 07") ;
-
-            
-            PrintWinScreen(i , 14) ;
+                PrintWinScreen(i , 14) ;
             
             }
             
