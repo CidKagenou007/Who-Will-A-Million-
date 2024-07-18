@@ -27,22 +27,13 @@ private :
 
     static void Row(string RowWords , short ColorRowWords) {
 
-        short max = 61 - RowWords.length() - 1 ;
-
         SetConsoleTextAttribute(h , 2) ;
 
         cout << "|" ;
 
         SetConsoleTextAttribute(h , ColorRowWords) ;
 
-        cout << RowWords  ;
-
-        for (short i = 0 ; i < max ; i++)
-            cout << " " ;
-
-        SetConsoleTextAttribute(h , 2) ;
-
-        cout << "|" << endl ;
+        cout << RowWords << endl ;
     }
 
     static void EndRow() {
@@ -87,12 +78,17 @@ private :
         switch (Choice) {
 
                 case enGameOptions::eFifty_Fifty :
-                    if (!(Check[0]))
-                        Check[0] = true ;
-                    else
-                        Fifty_Fifty_Used() ;
+                    if (!(Check[0])) {
 
-                    GameScreen(Choice) ;
+                        GameScreen(Choice) ;
+                        Check[0] = true ;
+                    }
+                        
+                    else {
+                        Fifty_Fifty_Used() ;
+                        GameScreen(Choice) ;
+                    }
+
                     Choice = (enGameOptions) ReadChoice() ;
                     PerformGame(Choice) ;
 
@@ -144,19 +140,19 @@ private :
 
         for (short j = 14 ; j >= 2 ; j -= 3)
             
-                Print(S[j] , S[j - 1] , S[j - 2]) ;
+            Print(S[j] , S[j - 1] , S[j - 2]) ;
     }
 
     static void HeadScreen() {
 
         EndRow() ;
-        Row("\tThe LifeLines To Use" , 6) ;
+        Row("\t\tThe LifeLines To Use" , 6) ;
         EndRow() ;
         Row("\t[5]:(Fifty-Fifty):" , 7 ) ;
         Row("\t[6]:(Phone-a-Friend):" , 7) ;
         Row("\t[5]:(Ask-the-Audience):" , 7) ;
         EndRow() ;
-        Row("\tConstestant Prize $" , 6 ) ;
+        Row("\t\tConstestant Prize $" , 6 ) ;
         EndRow() ;
 
         
@@ -174,35 +170,32 @@ private :
         vQuestionsTaken.push_back(Index) ;
     }
 
-    static void PrintAnswers(stAnswers Answer , enGameOptions Game) {
+    static void PrintAnswers(enGameOptions Game) {
+
+        stAnswers Answer = GetAnswers(Index) ;
 
         if (Game == enGameOptions::eFifty_Fifty && Check[0] == false) {
 
-            bool Founded = false ;
+            string Correct = GetCorrectAnswer(Index) ;
 
             for (short j = 0 ; j < 4 ; j++) {
 
-                if (Founded) {
-                    Row("\t(" + to_string((j + 1)) + ") " + Answer.Answers[j] , 7) ;
-                    break;
-                }
+                if (Answer.Answers[j] == Correct) {
 
-                else {
-
-                    if (Answer.Answers[j] == GetCorrectAnswer(Index)) {
+                    if (j != 3) {
                         Row("\t(" + to_string((j + 1)) + ") " + Answer.Answers[j] , 7) ;
-                        Founded = true ;
-                        continue;
+                        Row("\t(" + to_string((j + 2)) + ") " + Answer.Answers[j + 1] , 7) ;
+                    }
+                    else {
+
+                        Row("\t(" + to_string((j)) + ") " + Answer.Answers[j - 1] , 7) ;
+                        Row("\t(" + to_string((j + 1)) + ") " + Answer.Answers[j] , 7) ;
                     }
 
-                    if (Founded == false && j == 3) {
-                        j = 0 ;
-                        Founded = true ;
-                        
-                    }
-                      
+                    break;
 
                 }
+
 
                       
                         
@@ -225,13 +218,13 @@ private :
         PrintMoney() ;
 
         EndRow() ;
-        Row("\tThe Question" , 6) ;
+        Row("\t\tThe Question" , 6) ;
         EndRow() ;
 
         Row("\t" + Question(Index), 7) ;
         EndRow() ;
 
-        PrintAnswers(GetAnswers(Index) , Game) ;
+        PrintAnswers(Game) ;
 
         EndRow() ;
 
@@ -263,9 +256,7 @@ public :
 
                 GameScreen() ;
 
-                enGameOptions Choice = (enGameOptions) ReadChoice() ;
-
-                PerformGame(Choice) ;
+                PerformGame((enGameOptions) ReadChoice()) ;
 
                 clsCheckAnswerScreen::ShowCheckAnswerScreen() ;
                 
